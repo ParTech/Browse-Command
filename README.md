@@ -11,7 +11,7 @@ This module will do exactly the same but without entering Preview mode.
 
 References
 ------------
-Blog: http://www.partechit.nl/nl/blog/2013/03/handy-sitecore-command-open-item-in-new-window
+Blog: http://www.partechit.nl/nl/blog/2013/03/handy-sitecore-command-open-item-in-new-window  
 GitHub: https://github.com/ParTech/Browse-Command
 
 
