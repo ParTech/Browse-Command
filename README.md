@@ -9,7 +9,7 @@ This module will do exactly the same but without entering Preview mode.
 
 Installation
 ---------------
-The Sitecore package *\Release\Package.zip* contains:
+The Sitecore package *\Release\ParTech.Commands.Browse-1.0.0.zip* contains:
 - Binary (release build).
 - Configuration include file.
 - Core items that are required for this module.
