@@ -9,6 +9,12 @@ Sitecore does not offer this out-of-the-box, except for the Preview command whic
 This module will do exactly the same but without entering Preview mode.
 
 
+References
+------------
+Blog: http://www.partechit.nl/nl/blog/2013/03/handy-sitecore-command-open-item-in-new-window
+GitHub: https://github.com/ParTech/Browse-Command
+
+
 Installation
 ------------
 The Sitecore package *\Release\ParTech.Commands.Browse-1.0.0.zip* contains:
