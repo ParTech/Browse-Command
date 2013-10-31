@@ -15,6 +15,7 @@ using Sitecore.Configuration;
 using Sitecore.Web;
 using Sitecore.Publishing;
 using Sitecore.Text;
+using Sitecore.Links;
 
 namespace ParTech.Commands
 {
@@ -37,55 +38,55 @@ namespace ParTech.Commands
             }
             else
             {
-                string str = item.ID.ToString();
+                // Use default preview website if site or device could not be determined.
+                SiteContext site = Factory.GetSite(Settings.Preview.DefaultSite);
 
-                if (args.IsPostBack)
+                // Try to find a Site entry that serves this item.
+                // We well use that to determine which Device to use for previewing.
+                SiteInfo siteInfo = SiteContextFactory.Sites
+                    .FirstOrDefault(x => 
+                        x.PhysicalFolder.Equals("/") && item.Paths.FullPath.StartsWith(string.Concat(x.RootPath, x.StartItem), StringComparison.InvariantCultureIgnoreCase)
+                    );
+
+                DeviceItem defaultDevice = null;
+
+                if (siteInfo != null && !string.IsNullOrEmpty(siteInfo.DefaultDevice) && Context.ContentDatabase != null)
                 {
-                    if (args.Result != "yes")
-                    {
-                        return;
-                    }
-
-                    Item root = Context.ContentDatabase.GetItem(Context.Site.StartPath);
-
-                    if (root == null)
-                    {
-                        SheerResponse.Alert("Start item not found.", new string[0]);
-                        return;
-                    }
-                    else if (root.Visualization.Layout == null)
-                    {
-                        SheerResponse.Alert("The start item cannot be browsed to because it has no layout for the current device.\n\\nBrowse cannot be started.", new string[0]);
-                        return;
-                    }
-                    else
-                    {
-                        str = root.ID.ToString();
-                    }
+                    site = Factory.GetSite(siteInfo.Name);
+                    defaultDevice = Context.ContentDatabase.Resources.Devices[siteInfo.DefaultDevice];
                 }
-                else if (item.Visualization.Layout == null)
-                {
-                    SheerResponse.Confirm("The current item cannot be browsed to because it has no layout for the current device.\n\nDo you want to browse to the start Web page instead?");
-                    args.WaitForPostBack();
-                    return;
-                }
-
-                SheerResponse.CheckModified(false);
-                SiteContext site = Factory.GetSite(global::Sitecore.Configuration.Settings.Preview.DefaultSite);
 
                 Assert.IsNotNull(site, "Site \"{0}\" not found", new object[1]
                 {
-                  global::Sitecore.Configuration.Settings.Preview.DefaultSite
+                    Settings.Preview.DefaultSite
                 });
+
+                // Check if there is a Layout present, otherwise we can't preview
+                if (item.Visualization.Layout == null && (defaultDevice == null || item.Visualization.GetLayout(defaultDevice) == null))
+                {
+                    SheerResponse.Alert("The current item cannot be browsed to because it has no layout for the current or default device.");
+                    return;
+                }
+
+                // Determine the hostname to use for previewing the selected item
+                Uri siteHostName = new Uri(LinkManager.GetItemUrl(item, new UrlOptions
+                {
+                    AlwaysIncludeServerUrl = true,
+                    SiteResolving = true
+                }));
+
+                UrlString webSiteUrl = new UrlString(WebUtil.GetServerUrl(siteHostName, false)); 
+                
+                // Set preview querystring parameters
+                webSiteUrl["sc_itemid"] = item.ID.ToString();
+                webSiteUrl["sc_mode"] = "normal";
+                webSiteUrl["sc_lang"] = item.Language.ToString();
 
                 WebUtil.SetCookieValue(site.GetCookieKey("sc_date"), string.Empty);
                 PreviewManager.StoreShellUser(true);
 
-                UrlString webSiteUrl = SiteContext.GetWebSiteUrl();
-                webSiteUrl["sc_itemid"] = str;
-                webSiteUrl["sc_mode"] = "normal";
-                webSiteUrl["sc_lang"] = item.Language.ToString();
-
+                // Open the preview
+                SheerResponse.CheckModified(false);
                 SheerResponse.Eval("window.open('" + webSiteUrl + "', '_blank')");
             }
         }

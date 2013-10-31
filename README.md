@@ -17,7 +17,7 @@ GitHub: https://github.com/ParTech/Browse-Command
 
 Installation
 ------------
-The Sitecore package *\Release\ParTech.Commands.Browse-1.0.0.zip* contains:
+The Sitecore package *\Release\ParTech.Commands.Browse-1.0.1.zip* contains:
 - Binary (release build).
 - Configuration include file.
 - Core items that are required for this module.
@@ -34,6 +34,9 @@ Release notes
 -------------
 *1.0.0*
 - Initial release
+
+*1.0.1*
+- Added handling for default device configuration on <site> elements. The command will now try to use the default device for the first site it finds that hosts the selected item. If none found, it uses the default preview website as it did before.
 
 
 Author
