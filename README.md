@@ -36,7 +36,7 @@ Release notes
 - Initial release
 
 *1.0.1*
-- Added handling for default device configuration on <site> elements. The command will now try to use the default device for the first site it finds that hosts the selected item. If none found, it uses the default preview website as it did before.
+- Added handling for default device configuration on <site> elements. The command will now try to use the default device for the first site it finds that hosts the selected item and attempts to use the host name that is associated with that site. If none found, it uses the default preview website as it did before.
 
 
 Author
