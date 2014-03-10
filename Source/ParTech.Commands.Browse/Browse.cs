@@ -1,31 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Sitecore;
-using Sitecore.Data.Items;
-using Sitecore.Diagnostics;
-using Sitecore.Shell.Framework.Commands;
-using Sitecore.Web.UI.Sheer;
-using Sitecore.Data;
-using Sitecore.Sites;
-using Sitecore.Configuration;
-using Sitecore.Web;
-using Sitecore.Publishing;
-using Sitecore.Text;
-using Sitecore.Links;
-
-namespace ParTech.Commands
+﻿namespace ParTech.Commands
 {
+    using System;
+    using System.Linq;
+    using Sitecore;
+    using Sitecore.Configuration;
+    using Sitecore.Data;
+    using Sitecore.Data.Items;
+    using Sitecore.Diagnostics;
+    using Sitecore.Links;
+    using Sitecore.Publishing;
+    using Sitecore.Shell.Framework.Commands;
+    using Sitecore.Sites;
+    using Sitecore.Text;
+    using Sitecore.Web;
+    using Sitecore.Web.UI.Sheer;
+
     /// <summary>
-    /// Sitecore command that enables the user to browse to an item from the Sitecore tree (without going into Preview mode)
+    ///     Sitecore command that enables the user to browse to an item from the Sitecore tree (without going into Preview mode)
     /// </summary>
     public class Browse : PreviewItem
     {
         /// <summary>
-        /// Runs the specified args.
+        ///     Runs the specified args.
         /// </summary>
         /// <param name="args">The arguments.</param>
         protected new void Run(ClientPipelineArgs args)
@@ -44,9 +40,8 @@ namespace ParTech.Commands
                 // Try to find a Site entry that serves this item.
                 // We well use that to determine which Device to use for previewing.
                 SiteInfo siteInfo = SiteContextFactory.Sites
-                    .FirstOrDefault(x => 
-                        x.PhysicalFolder.Equals("/") && item.Paths.FullPath.StartsWith(string.Concat(x.RootPath, x.StartItem), StringComparison.InvariantCultureIgnoreCase)
-                    );
+                    .FirstOrDefault(x => x.PhysicalFolder.Equals("/") 
+                        && item.Paths.FullPath.StartsWith(string.Concat(x.RootPath, x.StartItem), StringComparison.InvariantCultureIgnoreCase));
 
                 DeviceItem defaultDevice = null;
 
@@ -56,10 +51,7 @@ namespace ParTech.Commands
                     defaultDevice = Context.ContentDatabase.Resources.Devices[siteInfo.DefaultDevice];
                 }
 
-                Assert.IsNotNull(site, "Site \"{0}\" not found", new object[1]
-                {
-                    Settings.Preview.DefaultSite
-                });
+                Assert.IsNotNull(site, "Site \"{0}\" not found", Settings.Preview.DefaultSite);
 
                 // Check if there is a Layout present, otherwise we can't preview
                 if (item.Visualization.Layout == null && (defaultDevice == null || item.Visualization.GetLayout(defaultDevice) == null))
@@ -68,15 +60,17 @@ namespace ParTech.Commands
                     return;
                 }
 
-                // Determine the hostname to use for previewing the selected item
-                Uri siteHostName = new Uri(LinkManager.GetItemUrl(item, new UrlOptions
+                var urlOptions = new UrlOptions
                 {
                     AlwaysIncludeServerUrl = true,
                     SiteResolving = true
-                }));
+                };
 
-                UrlString webSiteUrl = new UrlString(WebUtil.GetServerUrl(siteHostName, false)); 
-                
+                // Determine the hostname to use for previewing the selected item
+                Uri siteHostName = new Uri(LinkManager.GetItemUrl(item, urlOptions));
+
+                UrlString webSiteUrl = new UrlString(WebUtil.GetServerUrl(siteHostName, false));
+
                 // Set preview querystring parameters
                 webSiteUrl["sc_itemid"] = item.ID.ToString();
                 webSiteUrl["sc_mode"] = "normal";
